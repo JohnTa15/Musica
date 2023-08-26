@@ -13,6 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
+import android.widget.ArrayAdapter;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -29,13 +32,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_FOLDER_REQUEST = 2;
     private ListView SongsListView;
     private List<String> FilesList; //the list of songs that is displayed by choosing a file with searchdir
-    private ProgressBar progressBar;
+    private ProgressBar progressBar; //current min and sec of playing song
 
 
     ImageButton searchdir;
     ImageButton playbutton;
     ImageButton forwardbutton;
     ImageButton rewindbutton;
+    SearchView  SearchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +54,13 @@ public class MainActivity extends AppCompatActivity {
         playbutton = (ImageButton) findViewById(R.id.playbutton);
         forwardbutton = (ImageButton) findViewById(R.id.forwardbutton);
         rewindbutton = (ImageButton) findViewById(R.id.rewindbutton);
-
+        SearchButton = (SearchView) findViewById(R.id.SearchButton);
+//        SearchButton.setOnClickListener(this);
+    }
         searchdir.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                openFolderPicker();
+               openFolderPicker();
                 String state = Environment.DIRECTORY_DOWNLOADS;
                 if(Environment.MEDIA_MOUNTED.equals(state)) {
                     if(Build.VERSION.SDK_INT >= 23) {
@@ -66,36 +72,37 @@ public class MainActivity extends AppCompatActivity {
                                 for (int i = 0; i < list.length; i++) {
                                     SongsListView.add(list[i].getName());
                                 }
-                                ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, SongsListView);
-                                listview.setAdapter(arrayAdapter);
+                                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
+                                SongsListView.setAdapter(adapter);
                             }
                         } else {
-                            requestPermissions();
+                            requestStoragePermissionAndOpenFolderPicker();
                         }
                         }
                     }
                 }
-            }
         });
-        playbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
-        });
-        forwardbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+//        playbutton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
+//
+//        forwardbutton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
+//        rewindbutton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
 
-            }
-        });
-        rewindbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-    }
     private void requestStoragePermissionAndOpenFolderPicker() { //checking if permissions are granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -161,13 +168,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
         updateListView();
     }
 
     private void updateListView() {
-    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
-    SongsListView.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
+        SongsListView.setAdapter(adapter);
     }
 }
-

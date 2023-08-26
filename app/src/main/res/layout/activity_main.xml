@@ -11,18 +11,28 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
         android:text="Songs"
         android:textSize="32sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        />
+
+    <SearchView
+        android:id="@+id/SearchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        />
 
     <!-- ListView to display audio files -->
+
+    <!-- Horizontal LinearLayout for buttons -->
     <ListView
         android:id="@+id/SongsListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
-    <!-- Horizontal LinearLayout for buttons -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -62,6 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="visible"/>
+
 
 
 
