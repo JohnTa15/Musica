@@ -1,37 +1,46 @@
 package com.toxicity.musica;
 
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.widget.ArrayAdapter;
 import android.app.Service;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import java.nio.file.Files;
+import androidx.appcompat.view.menu.ShowableListMenu;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
 {
     final int TimeToPlay = 0;
-    int[] SongIDs;
+    int[] SongsIDs;
+    ArrayList<File> audiofiles;
     String[] SongTitles;
     int CurrentSong = 0;
+    int[] IDs;
     Boolean Act;
     int i;
-    int j;
     MediaPlayer MP;
     MusicaInterface RegUpdates = null;
+    private final IBinder Binder = new LocalBinder ();
 
     public MusicaService()
     {
+
     }
-    public void OnCreate()
+    public void onCreate()
     {
-        for(i = 1; i <= j; i++)
-        {
-            SongIDs = new int[i];
-        }
+        CurrentSong = 0;
+        Act = false;
+        MP = MediaPlayer.create(this, SongsIDs[CurrentSong]);
+        audiofiles = MusicFinder();
     }
 
     public void OnDestroy()
@@ -48,7 +57,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         Tst.show ();
     }
 
-//    @Override
+   @Override
     public void OnCompletion(MediaPlayer mp)
     {
         NextSong();
@@ -61,6 +70,12 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             MP.stop();
             MP.release();
         }
+        for(i = 0; i <= ; i++)
+        {
+            if(++CurrentSong == )
+                CurrentSong = 0;
+        }
+
     }
 
     public void PlaySong()
@@ -93,14 +108,12 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             RegUpdates.UpdateTitle (SongTitles[CurrentSong]);
     }
 
-    //Binding Proccess
-    private final IBinder Binder = new LocalBinder ();
-
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
 
     }
 
+    //Binding Proccess
     public class LocalBinder extends Binder
     {
         MusicaService getService ()
@@ -122,5 +135,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         ShowMessage ("Unbinded..");
         return false;
     }
+
+
 
 }

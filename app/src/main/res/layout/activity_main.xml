@@ -7,31 +7,31 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:text="Songs"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        />
-
     <SearchView
         android:id="@+id/SearchButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top|right"
-        />
+        android:queryHint="Search Songs..">
+    </SearchView>
 
     <!-- ListView to display audio files -->
 
     <!-- Horizontal LinearLayout for buttons -->
     <ListView
-        android:id="@+id/SongsListView"
+        android:id="@+id/SongListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1" >
+
+    </ListView>
+
+    <ImageButton
+        android:id="@+id/currentsong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill_horizontal"
+        android:src="@drawable/nomusic_foreground" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -72,8 +72,4 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="visible"/>
-
-
-
-
 </LinearLayout>

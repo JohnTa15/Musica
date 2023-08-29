@@ -1,53 +1,57 @@
 package com.toxicity.musica;
 
-import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
+import android.os.IBinder;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.ArrayAdapter;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int PERMISSION_REQUEST_READ_MEDIA_AUDIO = 1;
-    private static final int PICK_FOLDER_REQUEST = 2;
-    private ListView SongsListView;
-    private List<String> FilesList; //the list of songs that is displayed by choosing a file with searchdir
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SearchView.OnCloseListener {
+    private static final int PICK_AUDIO_FILE_REQUEST = 0;
+    private ListView SongListView;
+    private List<String> songList; //the list of songs that is displayed by choosing a file with searchdir
     private ProgressBar progressBar; //current min and sec of playing song
-
-
+    boolean Connected;
     ImageButton searchdir;
     ImageButton playbutton;
+    ArrayList<File> audiofiles = null;
     ImageButton forwardbutton;
     ImageButton rewindbutton;
     SearchView  SearchButton;
+    ImageButton currentsong;
+    int currentSongID;
+
+    MusicaService musicaService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        songList = new ArrayList<>();
 
-        SongsListView = findViewById(R.id.SongsListView);
-        FilesList = new ArrayList<>();
+        SongListView = findViewById(R.id.SongListView);
         progressBar = findViewById(R.id.progressBar);
 
         searchdir = (ImageButton) findViewById(R.id.searchdir);
@@ -55,124 +59,115 @@ public class MainActivity extends AppCompatActivity {
         forwardbutton = (ImageButton) findViewById(R.id.forwardbutton);
         rewindbutton = (ImageButton) findViewById(R.id.rewindbutton);
         SearchButton = (SearchView) findViewById(R.id.SearchButton);
-//        SearchButton.setOnClickListener(this);
-    }
-//        searchdir.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//               openFolderPicker();
-//                String state = Environment.DIRECTORY_DOWNLOADS;
-//                if(Environment.MEDIA_MOUNTED.equals(state)) {
-//                    if(Build.VERSION.SDK_INT >= 23) {
-//                        if(checkPermission()) {
-//                            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/");
-//                            if (dir.exists()) {
-//                                Log.d("path", dir.toString());
-//                                File list[] = dir.listFiles();
-//                                for (int i = 0; i < list.length; i++) {
-//                                    SongsListView.add(list[i].getName());
-//                                }
-//                                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
-//                                SongsListView.setAdapter(adapter);
-//                            }
-//                        } else {
-//                            requestStoragePermissionAndOpenFolderPicker();
-//                        }
-//                        }
-//                    }
-//                }
-//        });
+        currentsong = (ImageButton) findViewById(R.id.currentsong);
 
-//        playbutton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
-//
-//        forwardbutton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
-//        rewindbutton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
+        playbutton.setOnClickListener(this);
+        forwardbutton.setOnClickListener(this);
+        rewindbutton.setOnClickListener(this);
+        SearchButton.setOnCloseListener(this);
+        progressBar.setOnClickListener(this);
+        currentsong.setOnClickListener(this);
+        Connected = false;
 
-    private void requestStoragePermissionAndOpenFolderPicker() { //checking if permissions are granted
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            // Permissions not granted, request them
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_MEDIA_AUDIO
-                    },
-                    PERMISSION_REQUEST_CODE
-            );
-        } else {
-            // Permissions already granted, open folder picker
-            openFolderPicker();
-        }
-    }
 
-        private void openFolderPicker() { //forcing user to choose only mp3 file
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("audio/*");
-            startActivityForResult(intent, PICK_FOLDER_REQUEST);
-        }
-
-    private boolean isAudioFile(String fileName) { //we want to make sure that those are the specific extensions that we want to insert
-        String[] audioExtensions = {".mp3", ".wav", ".aac", ".ogg", ".flac"};
-
-        for (String extension : audioExtensions) {
-            if (fileName.toLowerCase().endsWith(extension)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onDestroy() { super.onDestroy(); }
 
-        if (requestCode == PICK_FOLDER_REQUEST && resultCode == RESULT_OK) {
-            Uri selectedFolderUri = data.getData();
-            if (selectedFolderUri != null) {
-                listAudioFilesFromFolder(selectedFolderUri);
-            }
+    @Override
+    public void onClick(View view)
+    {
+        if(view == playbutton && MusicaService.active) //first press for play music and second press for pause music
+        {
+            DoPause();
+        } else if(view == playbutton)
+        {
+            DoPlay();
+        }
+
+        if(view == forwardbutton)
+        {
+            DoNext();
+        }
+
+        if(view == rewindbutton)
+        {
+            DoPrevious();
         }
     }
 
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        finish();
+    }
 
-    private void listAudioFilesFromFolder(Uri folderUri) {
-        FilesList.clear();
-
-        String folderPath = folderUri.getPath();
-        Log.d("MainActivity", "Selected Folder Path: " + folderPath);
-        File folder = new File(folderPath);
-
-        if (folder.isDirectory()) {
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile() && isAudioFile(file.getName())) {
-                        FilesList.add(file.getName());
-                    }
-                }
-            }
+    void DoStart()
+    {
+        if(!Connected)
+        {
+            Intent musicaInt = new Intent(this, MusicaService.class);
+            bindService(musicaInt, ServConnection, Context.BIND_AUTO_CREATE);
         }
-        updateListView();
     }
 
-    private void updateListView() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
-        SongsListView.setAdapter(adapter);
+    void DoStop()
+    {
+        progressBar.setVisibility(View.GONE);
+        Connected = false;
+        unbindService(ServConnection);
     }
+
+    void DoPlay()
+    {
+        if(!Connected) {
+            progressBar.setVisibility(View.VISIBLE);
+            return;
+        }
+        MusicaService.PlaySong();
+    }
+
+    void DoPrevious()
+    {
+        if(!Connected)
+            return;
+        MusicaService.PreviousSong();
+    }
+
+    void DoNext()
+    {
+        if(!Connected)
+            return;
+        MusicaService.NextSong();
+    }
+
+    void DoPause()
+    {
+        if(!Connected)
+            return;
+        MusicaService.PauseSong();
+    }
+
+
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
+    @Override
+    public boolean onClose() { return false; }
+
+    private ServiceConnection ServConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service)
+        {
+            MusicaService.LocalBinder binder = (MusicaService.LocalBinder) service;
+            musicaService = binder.getService();
+            Connected = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName CompNam) { Connected = false;}
+    };
 }
