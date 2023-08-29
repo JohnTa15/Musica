@@ -60,7 +60,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         {
             MP.stop();
             MP.release();
-
         }
     }
 
