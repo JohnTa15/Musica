@@ -57,31 +57,31 @@ public class MainActivity extends AppCompatActivity {
         SearchButton = (SearchView) findViewById(R.id.SearchButton);
 //        SearchButton.setOnClickListener(this);
     }
-        searchdir.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               openFolderPicker();
-                String state = Environment.DIRECTORY_DOWNLOADS;
-                if(Environment.MEDIA_MOUNTED.equals(state)) {
-                    if(Build.VERSION.SDK_INT >= 23) {
-                        if(checkPermission()) {
-                            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/");
-                            if (dir.exists()) {
-                                Log.d("path", dir.toString());
-                                File list[] = dir.listFiles();
-                                for (int i = 0; i < list.length; i++) {
-                                    SongsListView.add(list[i].getName());
-                                }
-                                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
-                                SongsListView.setAdapter(adapter);
-                            }
-                        } else {
-                            requestStoragePermissionAndOpenFolderPicker();
-                        }
-                        }
-                    }
-                }
-        });
+//        searchdir.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//               openFolderPicker();
+//                String state = Environment.DIRECTORY_DOWNLOADS;
+//                if(Environment.MEDIA_MOUNTED.equals(state)) {
+//                    if(Build.VERSION.SDK_INT >= 23) {
+//                        if(checkPermission()) {
+//                            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/");
+//                            if (dir.exists()) {
+//                                Log.d("path", dir.toString());
+//                                File list[] = dir.listFiles();
+//                                for (int i = 0; i < list.length; i++) {
+//                                    SongsListView.add(list[i].getName());
+//                                }
+//                                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilesList);
+//                                SongsListView.setAdapter(adapter);
+//                            }
+//                        } else {
+//                            requestStoragePermissionAndOpenFolderPicker();
+//                        }
+//                        }
+//                    }
+//                }
+//        });
 
 //        playbutton.setOnClickListener(new View.OnClickListener() {
 //            @Override

@@ -13,7 +13,6 @@ import java.nio.file.Files;
 
 public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
 {
-
     final int TimeToPlay = 0;
     int[] SongIDs;
     String[] SongTitles;
@@ -26,7 +25,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 
     public MusicaService()
     {
-
     }
     public void OnCreate()
     {
@@ -50,7 +48,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         Tst.show ();
     }
 
-    @Override
+//    @Override
     public void OnCompletion(MediaPlayer mp)
     {
         NextSong();
@@ -99,6 +97,11 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     //Binding Proccess
     private final IBinder Binder = new LocalBinder ();
 
+    @Override
+    public void onCompletion(MediaPlayer mediaPlayer) {
+
+    }
+
     public class LocalBinder extends Binder
     {
         MusicaService getService ()
@@ -117,8 +120,8 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public boolean onUnbind(Intent intent)
     {
-        ShowMessage ("Someone Unbinded..");
-        return false;              //Allow Rebind? For started services
+        ShowMessage ("Unbinded..");
+        return false;
     }
 
 }
