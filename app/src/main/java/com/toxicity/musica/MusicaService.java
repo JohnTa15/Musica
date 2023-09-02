@@ -40,7 +40,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         CurrentSong = 0;
         Act = false;
         MP = MediaPlayer.create(this, SongsIDs[CurrentSong]);
-        audiofiles = MusicFinder();
+        audiofiles = new DirActionAct.MusicFinder();
     }
 
     public void OnDestroy()

@@ -26,59 +26,57 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle SavedInstanceState){
         super.onCreate(SavedInstanceState);
-        this.setContentView(R.layout.searchlayout);
+        this.setContentView(R.layout.activity_main);
         SongListView = findViewById(R.id.SongListView);
         permission_checker();
     }
 
-    private void permission_checker()
-    {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-            } else {
-            {
-                if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO)!= PackageManager.PERMISSION_GRANTED)
-                {
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.READ_MEDIA_AUDIO},PERMISSION_REQUEST_CODE);
-                }
-            }
-        }
     @Override
     public void onClick(View view) {
 
     }
 
-
-    //Finding Music Files..
-    public class MusicFinder {
-        String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-        File dir = new File(downloadPath);
-
-        songList = new ArrayList<>();
-
-
-
-        if(dir.exists() && dir.isDirectory())
-        {
-            File[] files = dir.listFiles();
-            if(files != null)
+    private void permission_checker() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        } else {
             {
-                for(File file : files)
-                {
-                    if(file.isFile() && file.getName().endsWith(".mp3")
-                            && file.getName().endsWith(".wav") && file.getName().endsWith(".ogg")
-                            && file.getName().endsWith(".flac") && file.getName().endsWith(".aac")
-                            && file.getName().endsWith(".ogg")) //we want to make sure that those are the specific extensions that we want to insert
-                    {
-                        songList.add(file.getName());
-                    }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.READ_MEDIA_AUDIO}, PERMISSION_REQUEST_CODE);
                 }
             }
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songList);
-        songListView.setAdapter(adapter);
+    }
+
+    //Finding Music Files..
+    public class MusicFinder {
+        public void findMusic() {
+            String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+//            File downloaddir = new File ("/storage/emulated/0/Download/Music");
+            File dir = new File(downloadPath);
+            ArrayList<String> songList = new ArrayList<>();
+
+            if (dir.exists() && dir.isDirectory()) {
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile() && file.getName().endsWith(".mp3")
+                                || file.getName().endsWith(".wav")
+                                || file.getName().endsWith(".ogg")
+                                || file.getName().endsWith(".flac")
+                                || file.getName().endsWith(".aac")
+                                || file.getName().endsWith(".ogg")) //we want to make sure that those are the specific extensions that we want to insert
+                        {
+                            songList.add(file.getName());
+                        }
+                    }
+                }
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songList);
+            songListView.setAdapter(adapter);
+        }
     }
 }
