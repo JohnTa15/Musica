@@ -1,5 +1,6 @@
 package com.toxicity.musica;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SearchView.OnCloseListener {
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton rewindbutton;
     SearchView  SearchButton;
     ImageButton currentsong;
+    ImageButton themeButton;
     int currentSongID;
 
     MusicaService musicaService;
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rewindbutton = (ImageButton) findViewById(R.id.rewindbutton);
         SearchButton = (SearchView) findViewById(R.id.SearchButton);
         currentsong = (ImageButton) findViewById(R.id.currentsong);
+        themeButton = (ImageButton) findViewById(R.id.themeButton);
 
         playbutton.setOnClickListener(this);
         forwardbutton.setOnClickListener(this);
@@ -67,18 +71,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SearchButton.setOnCloseListener(this);
         progressBar.setOnClickListener(this);
         currentsong.setOnClickListener(this);
+        themeButton.setOnClickListener(this);
         Connected = false;
-
-
+//        MusicaService musicaService = new MusicaService();
     }
-
     @Override
     public void onDestroy() { super.onDestroy(); }
 
     @Override
     public void onClick(View view)
     {
-        if(view == playbutton && MusicaService.active) //first press for play music and second press for pause music
+        if(view == playbutton && musicaService.Act) //first press for play music and second press for pause music
         {
             DoPause();
         } else if(view == playbutton)
@@ -125,32 +128,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             progressBar.setVisibility(View.VISIBLE);
             return;
         }
-        MusicaService.PlaySong();
+        musicaService.PlaySong();
     }
 
     void DoPrevious()
     {
         if(!Connected)
             return;
-        MusicaService.PreviousSong();
+        musicaService.PreviousSong();
     }
 
     void DoNext()
     {
         if(!Connected)
             return;
-        MusicaService.NextSong();
+        musicaService.NextSong();
     }
 
     void DoPause()
     {
         if(!Connected)
             return;
-        MusicaService.PauseSong();
+        musicaService.PauseSong();
+    }
+    @Override
+    public void changeThemeOnClick(View view)
+    {
+        String[] themes = {"Dark", "Light", "Special"};
+        int currentThemeIndex = Array.asList(themes).indexOf(getCurrentThemeName());
+
+        String nextTheme = themes[(currentThemeIndex + 1) % themes.length];
+
+        ThemeManager.changeTheme(this, nextTheme);
     }
 
-
-
+    private String getCurrentThemeName(){
+        int themeResId = getApplicationInfo().theme;
+        if(themeResId == R.style.AppTheme_Dark)
+            return "Dark";
+        else if(themeResId == R.style.AppTheme_Light)
+            return "Light";
+        else
+            return "Special";
+    }
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
@@ -159,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onClose() { return false; }
 
-    private ServiceConnection ServConnection = new ServiceConnection() {
+    private final ServiceConnection ServConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service)
         {

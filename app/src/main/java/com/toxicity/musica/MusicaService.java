@@ -15,21 +15,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
 {
     final int TimeToPlay = 0;
-    int[] SongsIDs;
-    ArrayList<File> audiofiles;
-    String[] SongTitles;
+    ArrayList<String> songPath; //path..
+    ArrayList<String> songTitles; //for displaying and updating Song Title
     int CurrentSong = 0;
-    int[] IDs;
     Boolean Act;
-    int i;
     MediaPlayer MP;
     MusicaInterface RegUpdates = null;
-    private final IBinder Binder = new LocalBinder ();
+    private final IBinder Binder = new LocalBinder();
 
     public MusicaService()
     {
@@ -40,7 +38,8 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         CurrentSong = 0;
         Act = false;
         MP = MediaPlayer.create(this, SongsIDs[CurrentSong]);
-        audiofiles = MusicFinder();
+        songPaths = MusicFinder();
+        MP.setOnCompletionListener(this);
     }
 
     public void OnDestroy()
@@ -63,21 +62,50 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         NextSong();
     }
 
+
+    public void PreviousSong()
+    {
+        if(Act) {
+            MP.stop();
+            MP.reset();
+        }
+            if(CurrentSong > 0) {
+                CurrentSong--; //moving to previous song
+                String previousSongPath = songPath.get(CurrentSong);
+                try {
+                    MP.setDataSource(previousSongPath);
+                    MP.prepare();
+                    MP.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                CurrentSong = songPath.size() - 1;
+            }
+
+        PlaySong();
+    }
     public void NextSong()
     {
-        if(MP.isPlaying())
+        if(CurrentSong < songPath.size() - 1) //checking the existance of next song
         {
             MP.stop();
-            MP.release();
-        }
-        for(i = 0; i <= ; i++)
-        {
-            if(++CurrentSong == )
-                CurrentSong = 0;
-        }
+            MP.reset();
 
+            CurrentSong++; //moving to the next song
+            String nextSongPath = songPath.get(CurrentSong);
+            try{
+                MP.setDataSource(nextSongPath);
+                MP.prepare();
+                MP.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else
+            CurrentSong = 0;
+        PlaySong();
     }
-
     public void PlaySong()
     {
         if(Act)
@@ -97,20 +125,23 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         Act = false;
     }
 
-    public String SongTitle()
-    {
-        return SongTitles[CurrentSong];
+    public String SongTitle() {
+        if (CurrentSong >= 0 && CurrentSong < songTitles.size()) {
+            return songTitles.get(CurrentSong);
+        } else {
+            return "";
+        }
     }
 
-    public void UpdateTitle ()
-    {
-        if (RegUpdates != null)
-            RegUpdates.UpdateTitle (SongTitles[CurrentSong]);
+    public void UpdateTitle() {
+        if (RegUpdates != null) {
+            RegUpdates.UpdateTitle(SongTitle());
+        }
     }
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-
+        NextSong();
     }
 
     //Binding Proccess
@@ -135,7 +166,4 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         ShowMessage ("Unbinded..");
         return false;
     }
-
-
-
 }
