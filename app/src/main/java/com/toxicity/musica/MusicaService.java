@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import java.util.List;
 
 import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.core.app.ActivityCompat;
@@ -37,12 +38,28 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     {
         CurrentSong = 0;
         Act = false;
-        MP = MediaPlayer.create(this, SongsIDs[CurrentSong]);
-        songPaths = MusicFinder();
+        DirActionAct.MusicFinder musicFinder = new DirActionAct.MusicFinder();
+        List<File> songPath = musicFinder.findMusicFiles();
+
+        if (!songPath.isEmpty()) {
+            // Assuming you want to play the first song in the list
+            String firstSong = songPath.get(0).getAbsolutePath();
+            // Create and prepare the MediaPlayer with the first song
+            MP = new MediaPlayer();
+
+            try {
+                MP.setDataSource(firstSong);
+                MP.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         MP.setOnCompletionListener(this);
+
     }
 
-    public void OnDestroy()
+
+    public void onDestroy()
     {
         ShowMessage("Service Destroyed");
         MP.stop();
@@ -55,13 +72,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         Toast Tst = Toast.makeText (getApplicationContext (), "Service: " + Mess, Toast.LENGTH_LONG);
         Tst.show ();
     }
-
-   @Override
-    public void OnCompletion(MediaPlayer mp)
-    {
-        NextSong();
-    }
-
 
     public void PreviousSong()
     {
@@ -140,7 +150,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
+    public void onCompletion(MediaPlayer mp) {
         NextSong();
     }
 

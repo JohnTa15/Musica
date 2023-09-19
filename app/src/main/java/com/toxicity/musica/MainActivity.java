@@ -1,11 +1,14 @@
 package com.toxicity.musica;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -17,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 
 import androidx.annotation.NonNull;
@@ -34,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int PICK_AUDIO_FILE_REQUEST = 0;
     private ListView SongListView;
     private List<String> songList; //the list of songs that is displayed by choosing a file with searchdir
+    private TextView songNameTextView;
     private ProgressBar progressBar; //current min and sec of playing song
     boolean Connected;
     ImageButton searchdir;
@@ -44,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SearchView  SearchButton;
     ImageButton currentsong;
     ImageButton themeButton;
-    int currentSongID;
 
     MusicaService musicaService;
 
@@ -55,29 +59,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         songList = new ArrayList<>();
 
         SongListView = findViewById(R.id.SongListView);
+        songNameTextView = findViewById(R.id.songNameTextView);
         progressBar = findViewById(R.id.progressBar);
 
-        searchdir = (ImageButton) findViewById(R.id.searchdir);
-        playbutton = (ImageButton) findViewById(R.id.playbutton);
-        forwardbutton = (ImageButton) findViewById(R.id.forwardbutton);
-        rewindbutton = (ImageButton) findViewById(R.id.rewindbutton);
-        SearchButton = (SearchView) findViewById(R.id.SearchButton);
-        currentsong = (ImageButton) findViewById(R.id.currentsong);
-        themeButton = (ImageButton) findViewById(R.id.themeButton);
+        searchdir = findViewById(R.id.searchdir);
+        playbutton = findViewById(R.id.playbutton);
+        forwardbutton = findViewById(R.id.forwardbutton);
+        rewindbutton = findViewById(R.id.rewindbutton);
+//        SearchButton = (SearchView) findViewById(R.id.SearchButton);
+        currentsong = findViewById(R.id.currentsong);
+        themeButton = findViewById(R.id.themeButton);
 
         playbutton.setOnClickListener(this);
         forwardbutton.setOnClickListener(this);
         rewindbutton.setOnClickListener(this);
-        SearchButton.setOnCloseListener(this);
+//        SearchButton.setOnCloseListener(this);
         progressBar.setOnClickListener(this);
         currentsong.setOnClickListener(this);
         themeButton.setOnClickListener(this);
         Connected = false;
-//        MusicaService musicaService = new MusicaService();
+
+        //registering broadcast receiver to listen for the finish of the song
+        IntentFilter filter = new IntentFilter("com.example.SONG_COMPLETED");
+        registerReceiver(completionReceiver, filter);
     }
     @Override
     public void onDestroy() { super.onDestroy(); }
 
+    //updating song in the textviewbar
+    private void updateSongName(String songName)
+    {
+        songNameTextView.setText(songName);
+    }
+
+    private void onCompletion(MediaPlayer mp){
+        String songName = "Next Song";
+        updateSongName(songName);
+
+        Intent intent = new Intent("com.example.SONG_COMPLETED");
+        intent.putExtra("songName", songName);
+        sendBroadcast(intent);
+    }
     @Override
     public void onClick(View view)
     {
@@ -151,11 +173,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         musicaService.PauseSong();
     }
-    @Override
+
     public void changeThemeOnClick(View view)
     {
         String[] themes = {"Dark", "Light", "Special"};
-        int currentThemeIndex = Array.asList(themes).indexOf(getCurrentThemeName());
+        int currentThemeIndex = Arrays.asList(themes).indexOf(getCurrentThemeName());
 
         String nextTheme = themes[(currentThemeIndex + 1) % themes.length];
 
@@ -189,5 +211,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         @Override
         public void onServiceDisconnected(ComponentName CompNam) { Connected = false;}
+    };
+
+    private final BroadcastReceiver completionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String songName = intent.getStringExtra("songName");
+            updateSongName(songName);
+        }
     };
 }

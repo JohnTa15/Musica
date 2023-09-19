@@ -7,13 +7,13 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <SearchView
-        android:id="@+id/SearchButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:queryHint="Search Songs..">
-    </SearchView>
+<!--    <SearchView-->
+<!--        android:id="@+id/SearchButton"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="top|right"-->
+<!--        android:queryHint="Search Songs..">-->
+<!--    </SearchView>-->
 
     <!-- ListView to display audio files -->
 
@@ -22,7 +22,7 @@
         android:id="@+id/SongListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:layout_weight="1">
 
     </ListView>
 
@@ -31,16 +31,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_horizontal"
-        android:src="@drawable/nomusic_foreground" />
+        android:src="@drawable/nomusic_foreground"
+        android:contentDescription="Current Song"/>
 
 
-    <EditText
-        android:id="@+id/editTextText"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/songNameTextView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Song Name" />
+        android:text="Song Name"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:contentDescription="Displaying songs"/>
+
 
 
 
@@ -54,32 +57,39 @@
             android:id="@+id/rewindbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_rew" />
+            app:srcCompat="@android:drawable/ic_media_rew"
+            android:contentDescription="It is Rewind Time"/>
 
         <ImageButton
             android:id="@+id/playbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_play" />
+            app:srcCompat="@android:drawable/ic_media_play"
+            android:contentDescription="It is Play Time" />
 
         <ImageButton
             android:id="@+id/forwardbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_ff" />
+            app:srcCompat="@android:drawable/ic_media_ff"
+            android:contentDescription="It is Forward Time"/>
 
         <ImageButton
             android:id="@+id/searchdir"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_menu_search" />
+            app:srcCompat="@android:drawable/ic_menu_search"
+            android:contentDescription="Search.."/>
 
         <ImageButton
             android:id="@+id/themeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_change_theme"
-            android:onClick="changeThemeOnClick" />
+            app:srcCompat="@android:drawable/ic_menu_slideshow"
+            android:onClick="changeThemeOnClick"
+            android:contentDescription="Dark/White"
+            android:padding="10dp"/>  <!--for better touch-->
+
 
     </LinearLayout>
 

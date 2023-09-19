@@ -24,10 +24,12 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
 
 
     @Override
-    protected void onCreate(Bundle SavedInstanceState){
+    protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
-        setContentView (R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         SongListView = findViewById(R.id.SongListView);
+        MusicFinder musicFinder = new MusicFinder();
+        List<File> musicFiles = musicFinder.findMusicFiles();
         permission_checker();
     }
 
@@ -51,29 +53,32 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public static class MusicFinder {
 
-    //Finding Music Files..
-    public class MusicFinder {
-        String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-        File dir = new File(downloadPath);
-        ArrayList<File> songList = new ArrayList<>();
-        if(dir.exists()&&dir.isDirectory())
-        {
-            File[] files = dir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(".mp3")
-                            && file.getName().endsWith(".wav") && file.getName().endsWith(".ogg")
-                            && file.getName().endsWith(".flac") && file.getName().endsWith(".aac")
-                            && file.getName().endsWith(".ogg")) //we want to make sure that those are the specific extensions that we want to insert
-                    {
-                        songList.add(file.getName());
+        //Finding Music Files..
+        public List<File> findMusicFiles() {
+            List<File> songList = new ArrayList<>();
+            String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            File dir = new File(downloadPath);
+
+            if (dir.exists() && dir.isDirectory()) {
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile() && (file.getName().endsWith(".mp3")
+                                || file.getName().endsWith(".wav")
+                                || file.getName().endsWith(".ogg")
+                                || file.getName().endsWith(".flac")
+                                || file.getName().endsWith(".aac")
+                                || file.getName().endsWith(".ogg"))) {
+                            songList.add(file);
+                        }
                     }
                 }
             }
+
             return songList;
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songList);
-        songListView.setAdapter(adapter);
     }
+}
 
