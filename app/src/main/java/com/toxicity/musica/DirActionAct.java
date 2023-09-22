@@ -20,7 +20,6 @@ import java.util.List;
 public class DirActionAct extends AppCompatActivity implements View.OnClickListener {
     private final int PERMISSION_REQUEST_CODE = 1;
     private ListView SongListView;
-    private List<String> songList; //the list of songs that is displayed by choosing a file with searchdir
 
 
     @Override
@@ -34,13 +33,14 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
     }
 
     private void permission_checker() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-        } else {
-            {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            } else {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this,
                             new String[]{Manifest.permission.READ_MEDIA_AUDIO}, PERMISSION_REQUEST_CODE);
                 }
@@ -57,7 +57,7 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
 
         //Finding Music Files..
         public List<File> findMusicFiles() {
-            List<File> songList = new ArrayList<>();
+            List<File> songList = new ArrayList<>();  //the list of songs that is displayed by choosing a file with searchdir
             String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
             File dir = new File(downloadPath);
 
@@ -76,9 +76,7 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
                     }
                 }
             }
-
             return songList;
         }
     }
 }
-

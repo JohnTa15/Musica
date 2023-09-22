@@ -1,6 +1,7 @@
 package com.toxicity.musica;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +27,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 
@@ -37,11 +40,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SearchView.OnCloseListener {
     private static final int PICK_AUDIO_FILE_REQUEST = 0;
     private ListView SongListView;
-    private List<String> songList; //the list of songs that is displayed by choosing a file with searchdir
+    private List<String> songList; //the list of songs that is displayed by choosing a file with searchbutton
     private TextView songNameTextView;
     private ProgressBar progressBar; //current min and sec of playing song
     boolean Connected;
-    ImageButton searchdir;
+    ImageButton searchbutton;
     ImageButton playbutton;
     ArrayList<File> audiofiles = null;
     ImageButton forwardbutton;
@@ -55,14 +58,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         songList = new ArrayList<>();
 
         SongListView = findViewById(R.id.SongListView);
         songNameTextView = findViewById(R.id.songNameTextView);
         progressBar = findViewById(R.id.progressBar);
 
-        searchdir = findViewById(R.id.searchdir);
+        searchbutton = findViewById(R.id.searchbutton);
         playbutton = findViewById(R.id.playbutton);
         forwardbutton = findViewById(R.id.forwardbutton);
         rewindbutton = findViewById(R.id.rewindbutton);
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view)
     {
+        setContentView(R.layout.activity_main);
+
         if(view == playbutton && musicaService.Act) //first press for play music and second press for pause music
         {
             DoPause();
@@ -142,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressBar.setVisibility(View.GONE);
         Connected = false;
         unbindService(ServConnection);
+        musicaService.PauseSong();
     }
 
     void DoPlay()

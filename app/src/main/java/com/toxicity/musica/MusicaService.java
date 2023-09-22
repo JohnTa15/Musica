@@ -1,18 +1,24 @@
 package com.toxicity.musica;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.widget.ArrayAdapter;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 import java.util.List;
 
 import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
@@ -58,7 +64,40 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 
     }
 
+    private void createNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.0){
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("Notification Channel", "Notification", importance);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+    public void DisplayNotification()
+    {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this,0,
+                notificationIntent, 0);
+        RemoteViews notibuttons = new RemoteViews(getPackageName(),R.mipmap.musica);
+        Intent rewindButtonIntent = new Intent(this, NotificationReceiver.class);
+        rewindButtonIntent.setAction("Rewind");
+        Intent forwardButtonIntent = new Intent(this, NotificationReceiver.class);
+        rewindButtonIntent.setAction("Forward");
+        Intent ppButtonIntent = new Intent(this, NotificationReceiver.class);
+        rewindButtonIntent.setAction("Play/Pause");
+        notibuttons.setOnClickPendingIntent(..., rewindButtonIntent)
+        notibuttons.setOnClickPendingIntent(image..., forwardButtonIntent)
+        notibuttons.setOnClickPendingIntent(image..., ppButtonIntent)
 
+
+        String textContent = "Musica is active!";
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+        .setContentTitle("Musica Player")
+        .setContentText(textContent)
+        .setSmallIcon(R.mipmap.musica)
+        .setAutoCancel(true)
+        .setOngoing(true)
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+    }
     public void onDestroy()
     {
         ShowMessage("Service Destroyed");
@@ -116,10 +155,13 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             CurrentSong = 0;
         PlaySong();
     }
+
     public void PlaySong()
     {
-        if(Act)
+        if(Act) {
+            DisplayNotification();
             return;
+        }
         MP.start();
         if(TimeToPlay > 0)
             MP.seekTo(MP.getDuration() - TimeToPlay);

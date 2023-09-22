@@ -15,8 +15,17 @@
 <!--        android:queryHint="Search Songs..">-->
 <!--    </SearchView>-->
 
-    <!-- ListView to display audio files -->
 
+<!--search songs..-->
+    <ImageButton
+        android:id="@+id/searchbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@android:drawable/ic_menu_search"
+        android:layout_gravity="top|right"
+        android:contentDescription="Search.."/>
+
+    <!-- ListView to display audio files -->
     <!-- Horizontal LinearLayout for buttons -->
     <ListView
         android:id="@+id/SongListView"
@@ -43,9 +52,6 @@
         android:layout_gravity="center_horizontal"
         android:textSize="20sp"
         android:contentDescription="Displaying songs"/>
-
-
-
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -75,11 +81,11 @@
             android:contentDescription="It is Forward Time"/>
 
         <ImageButton
-            android:id="@+id/searchdir"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_menu_search"
-            android:contentDescription="Search.."/>
+            android:id="@+id/shufflebutton"
+            android:layout_width="59dp"
+            android:layout_height="match_parent"
+            android:contentDescription="ShuffleTime"
+            app:srcCompat="@drawable/ic_shuffle" />
 
         <ImageButton
             android:id="@+id/themeButton"
