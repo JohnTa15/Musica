@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         songList = new ArrayList<>();
-
         SongListView = findViewById(R.id.SongListView);
         songNameTextView = findViewById(R.id.songNameTextView);
         progressBar = findViewById(R.id.progressBar);

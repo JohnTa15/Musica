@@ -61,36 +61,36 @@
 
         <ImageButton
             android:id="@+id/rewindbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_rew"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_rewind"
             android:contentDescription="It is Rewind Time"/>
 
         <ImageButton
             android:id="@+id/playbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_play"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_play"
             android:contentDescription="It is Play Time" />
 
         <ImageButton
             android:id="@+id/forwardbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_ff"
-            android:contentDescription="It is Forward Time"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="It is Forward Time"
+            app:srcCompat="@drawable/ic_forward" />
 
         <ImageButton
             android:id="@+id/shufflebutton"
-            android:layout_width="59dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="ShuffleTime"
             app:srcCompat="@drawable/ic_shuffle" />
 
         <ImageButton
             android:id="@+id/themeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:srcCompat="@android:drawable/ic_menu_slideshow"
             android:onClick="changeThemeOnClick"
             android:contentDescription="Dark/White"

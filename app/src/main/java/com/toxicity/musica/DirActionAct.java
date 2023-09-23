@@ -56,10 +56,9 @@ public class DirActionAct extends AppCompatActivity implements View.OnClickListe
     public static class MusicFinder {
 
         //Finding Music Files..
-        public List<File> findMusicFiles() {
-            List<File> songList = new ArrayList<>();  //the list of songs that is displayed by choosing a file with searchdir
-            String downloadPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-            File dir = new File(downloadPath);
+        public ArrayList<File> findMusicFiles() {
+            File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+            ArrayList<File> songList= new ArrayList<>();
 
             if (dir.exists() && dir.isDirectory()) {
                 File[] files = dir.listFiles();
