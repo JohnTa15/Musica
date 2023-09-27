@@ -7,21 +7,14 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-<!--    <SearchView-->
-<!--        android:id="@+id/SearchButton"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="top|right"-->
-<!--        android:queryHint="Search Songs..">-->
-<!--    </SearchView>-->
-
 
 <!--search songs..-->
     <ImageButton
         android:id="@+id/searchbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@android:drawable/ic_menu_search"
+        tools:srcCompat="@android:drawable/ic_menu_search"
+        android:src = "@android:drawable/ic_menu_search"
         android:layout_gravity="top|right"
         android:contentDescription="Search.."/>
 
@@ -35,23 +28,21 @@
 
     </ListView>
 
-    <ImageButton
-        android:id="@+id/currentsong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill_horizontal"
-        android:src="@drawable/nomusic_foreground"
-        android:contentDescription="Current Song"/>
-
-
     <TextView
         android:id="@+id/songNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Song Name"
+        android:text=""
         android:layout_gravity="center_horizontal"
         android:textSize="20sp"
+        android:textStyle="bold"
         android:contentDescription="Displaying songs"/>
+
+    <TextView
+        android:id="@+id/progressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Duration"></TextView>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -63,14 +54,16 @@
             android:id="@+id/rewindbutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_rewind"
+            tools:srcCompat="@drawable/ic_rewind"
+            android:src="@drawable/ic_rewind"
             android:contentDescription="It is Rewind Time"/>
 
         <ImageButton
             android:id="@+id/playbutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_play"
+            tools:srcCompat="@drawable/ic_play"
+            android:src="@drawable/ic_play"
             android:contentDescription="It is Play Time" />
 
         <ImageButton
@@ -78,33 +71,38 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="It is Forward Time"
-            app:srcCompat="@drawable/ic_forward" />
+            tools:srcCompat="@drawable/ic_forward"
+            android:src="@drawable/ic_forward"/>
 
         <ImageButton
             android:id="@+id/shufflebutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="ShuffleTime"
-            app:srcCompat="@drawable/ic_shuffle" />
+            tools:srcCompat="@drawable/ic_shuffle"
+            android:src="@drawable/ic_shuffle"/>
 
         <ImageButton
             android:id="@+id/themeButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@android:drawable/ic_menu_slideshow"
+            tools:srcCompat="@android:drawable/ic_menu_slideshow"
+            android:src="@android:drawable/ic_menu_slideshow"
             android:onClick="changeThemeOnClick"
             android:contentDescription="Dark/White"
             android:padding="10dp"/>  <!--for better touch-->
 
-
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <SeekBar
+        android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="visible"/>
+        android:max="100"
+        android:progress="0"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"/>
 
 </LinearLayout>

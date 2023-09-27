@@ -1,29 +1,19 @@
 package com.toxicity.musica;
 
-import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Environment;
 import android.os.IBinder;
-import android.widget.ArrayAdapter;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
-import java.util.List;
-
-import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,13 +22,14 @@ import java.util.ArrayList;
 public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
 {
     final int TimeToPlay = 0;
-    ArrayList<String> songPath; //path..
     ArrayList<File> filename;
     int[] songID;
     ArrayList<String> songTitle; //for displaying and updating Song Title
-    int CurrentSong = 0;
+    public static int CurrentSong = 0;
     Boolean Act;
-    MediaPlayer MP;
+    static MediaPlayer MP;
+    int maxProgress;
+    int currentProgress;
     private static final int NOTIFICATION_ID = 1;
     MusicaInterface RegUpdates = null;
     private final IBinder Binder = new LocalBinder();
@@ -51,13 +42,51 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     {
         CurrentSong = 0;
         Act = false;
+        DirAction.MusicFinder musicFinder = new DirAction.MusicFinder();
+        filename = DirAction.MusicFinder.findMusicFiles();
+        if (!filename.isEmpty())
+        {
+            MP = new MediaPlayer();
+            try {
+                MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
+                MP.prepare();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            maxProgress = MP.getDuration();
+            currentProgress = MP.getCurrentPosition();
+        }
         IDs();
-        DirActionAct.MusicFinder musicFinder = new DirActionAct.MusicFinder();
-        filename = musicFinder.findMusicFiles();
         createNotificationChannel();
         DisplayNotification();
-        MP = new MediaPlayer();
+//        MP = new MediaPlayer();
+//        try {
+//            MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
+//            MP.prepare();
+//        } catch (IOException e){
+//            e.printStackTrace();
+//        }
+//        maxProgress = MP.getDuration();
+//        currentProgress = MP.getCurrentPosition();
+    }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+            if (CurrentSong >= 0 && CurrentSong == intent.getIntExtra("playing_song", 0)) {
+                return START_STICKY;
+            }
+            if (MP.isPlaying()) {
+                MP.stop();
+                MP.release();
+            }
+        try {
+            MP.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+            MP.start();
+            Act = true;
+            return START_STICKY;
     }
 
     private void createNotificationChannel(){
@@ -73,34 +102,38 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             notificationManager.createNotificationChannel(channel);
         }
     }
-
     public void DisplayNotification()
     {
-        RemoteViews notibuttons = new RemoteViews(getPackageName(), R.layout.notifications); // Replace with your actual layout resource ID
+//        RemoteViews notibuttons = new RemoteViews(getPackageName(), R.layout.notifications); // Replace with your actual layout resource ID
+//
+//        Intent rewindButtonIntent = new Intent(this, NotificationReceiver.class);
+//        rewindButtonIntent.setAction("Rewind");
+//        PendingIntent rewindPendingIntent = PendingIntent.getBroadcast(this, 0, rewindButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        Intent forwardButtonIntent = new Intent(this, NotificationReceiver.class);
+//        forwardButtonIntent.setAction("Forward");
+//        PendingIntent forwardPendingIntent = PendingIntent.getBroadcast(this, 1, forwardButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        Intent ppButtonIntent = new Intent(this, NotificationReceiver.class);
+//        ppButtonIntent.setAction("Play/Pause");
+//        PendingIntent ppPendingIntent = PendingIntent.getBroadcast(this, 2, ppButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//
+//        notibuttons.setOnClickPendingIntent(R.id.rewindbutton, rewindPendingIntent);
+//        notibuttons.setOnClickPendingIntent(R.id.forwardbutton, forwardPendingIntent);
+//        notibuttons.setOnClickPendingIntent(R.id.playbutton, ppPendingIntent);
+//        notibuttons.setProgressBar(R.id.progressBar, maxProgress, currentProgress, false);
 
-        Intent rewindButtonIntent = new Intent(this, NotificationReceiver.class);
-        rewindButtonIntent.setAction("Rewind");
-        PendingIntent rewindPendingIntent = PendingIntent.getBroadcast(this, 0, rewindButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Intent forwardButtonIntent = new Intent(this, NotificationReceiver.class);
-        forwardButtonIntent.setAction("Forward");
-        PendingIntent forwardPendingIntent = PendingIntent.getBroadcast(this, 1, forwardButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Intent ppButtonIntent = new Intent(this, NotificationReceiver.class);
-        ppButtonIntent.setAction("Play/Pause");
-        PendingIntent ppPendingIntent = PendingIntent.getBroadcast(this, 2, ppButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-        notibuttons.setOnClickPendingIntent(R.id.rewindbutton, rewindPendingIntent);
-        notibuttons.setOnClickPendingIntent(R.id.forwardbutton, forwardPendingIntent);
-        notibuttons.setOnClickPendingIntent(R.id.playbutton, ppPendingIntent);
 
         String textContent = "Musica is active!";
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
                 .setContentTitle("Musica Player")
                 .setContentText(textContent)
                 .setSmallIcon(R.mipmap.musica)
-                .setContent(notibuttons) // Set the custom RemoteViews here
+//                .setContent(notibuttons) // Set the custom RemoteViews here
+                .addAction(R.id.rewindbutton,"Rewind",null)
+                .addAction(R.id.forwardbutton,"Forward",null)
+                .addAction(R.id.playbutton,"PP",null)
                 .setAutoCancel(true)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
@@ -111,66 +144,52 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             notificationManager.notify(NOTIFICATION_ID, builder.build());
         }
-
-
     }
     public void onDestroy()
     {
-        ShowMessage("Service Destroyed");
-        MP.stop();
-        MP.release();
-        Act = false;
-    }
-
-    private void ShowMessage(String Mess) //creating Toast Notifications
-    {
-        Toast Tst = Toast.makeText (getApplicationContext (), "Service: " + Mess, Toast.LENGTH_LONG);
-        Tst.show ();
+        if(!filename.isEmpty()) {
+            MP.stop();
+            MP.release();
+            Act = false;
+        }
     }
 
     public void PreviousSong()
     {
-        if(Act) {
+        if(MP.isPlaying()) {
             MP.stop();
-            MP.reset();
+            MP.release();
         }
-            if(CurrentSong > 0) {
-                CurrentSong--; //moving to previous song
-                String previousSongPath = songPath.get(CurrentSong);
+                if(--CurrentSong == -1) //moving to previous song
+                    CurrentSong = filename.size() - 1;
                 try {
-                    MP.setDataSource(previousSongPath);
+                    MP = new MediaPlayer();
+                    MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
                     MP.prepare();
                     MP.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else {
-                CurrentSong = songPath.size() - 1;
-            }
-
         PlaySong();
     }
-    public void NextSong()
-    {
-        if(CurrentSong < songPath.size() - 1) //checking the existance of next song
-        {
-            MP.stop();
-            MP.reset();
+    public void NextSong() {
 
-            CurrentSong++; //moving to the next song
-            String nextSongPath = songPath.get(CurrentSong);
-            try{
-                MP.setDataSource(nextSongPath);
+        if(MP.isPlaying()) {
+            MP.stop();
+            MP.release();
+        }
+            if (++CurrentSong == filename.size()) //moving to the next song
+                CurrentSong = 0;
+            try {
+                MP = new MediaPlayer();
+                MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
                 MP.prepare();
                 MP.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else
-            CurrentSong = 0;
-        PlaySong();
-    }
+            PlaySong();
+        }
 
     public void PlaySong()
     {
@@ -200,7 +219,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             return "";
         }
     }
-    public void IDs() {
+    public void IDs() { //creating ID for each song (ex. songID[1] the first one)
         songID = new int[filename.size()];
         for (int i = 0; i < filename.size(); i++)
             songID[i] = i;
@@ -228,14 +247,12 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public IBinder onBind (Intent intent)
     {
-        ShowMessage ("Binding Successfully..");
         return Binder;
     }
 
     @Override
     public boolean onUnbind(Intent intent)
     {
-        ShowMessage ("Unbinded..");
         return false;
     }
 }
