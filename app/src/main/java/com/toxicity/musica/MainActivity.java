@@ -83,13 +83,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         songList = DirAction.MusicFinder.findMusicFiles();
         for(File i:songList) {
-            SongNames.add(i.getName());
+            String filename = i.getName(); //audio file names
+            int lastDotIndex = filename.lastIndexOf("."); //in case it has extensions..
+
+//            SongNames.add(i.getName());
+            if(lastDotIndex > 0) {
+                String SongNameswithoutExt = filename.substring(0, lastDotIndex);
+                SongNames.add(SongNameswithoutExt); //removing extensions
+            } else
+                SongNames.add(filename); //in any case the audio file does not have any .extension :)
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, SongNames);
         arrayAdapter.notifyDataSetChanged();
         SongListView.setAdapter(arrayAdapter);
 
-//        songNameTextView = findViewById(R.id.songNameTextView);
         seekBar = findViewById(R.id.seekBar);
         progressTextView = findViewById(R.id.progressTextView);
         DurationSong = findViewById(R.id.DurationSong);
@@ -124,6 +131,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 MusicaService.CurrentSong = i;
                 progressTextView.setText(SongNames.get(i));
+                File songFile = songList.get(i);
+                if(musicaService != null)
+                    musicaService.playselectedSong(songFile);
                 UpdateDuration();
             }
         });
@@ -172,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        seekBar.setProgress((int) MusicaService.MP.getCurrentPosition());
+                        seekBar.setProgress(MusicaService.MP.getCurrentPosition());
                     }
                 });
             }

@@ -221,6 +221,24 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         NextSong();
     }
 
+    public void playselectedSong(File songFile) {
+        if(MP != null)
+        {
+            MP.stop();
+            MP.release();
+            MP = null;
+        }
+        MP = new MediaPlayer();
+        try {
+            MP.setDataSource(songFile.getAbsolutePath());
+            MP.prepare();
+            MP.start();
+            Act = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     //Binding Proccess
     public class LocalBinder extends Binder
     {
