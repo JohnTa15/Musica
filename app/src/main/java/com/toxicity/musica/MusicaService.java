@@ -1,5 +1,7 @@
 package com.toxicity.musica;
 
+import static com.toxicity.musica.MainActivity.SongNames;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
@@ -18,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
 
 public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
 {
@@ -31,7 +34,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     int maxProgress;
     int currentProgress;
     private static final int NOTIFICATION_ID = 1;
-    MusicaInterface RegUpdates = null;
     private final IBinder Binder = new LocalBinder();
 
     public MusicaService()
@@ -59,15 +61,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         IDs();
         createNotificationChannel();
         DisplayNotification();
-//        MP = new MediaPlayer();
-//        try {
-//            MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
-//            MP.prepare();
-//        } catch (IOException e){
-//            e.printStackTrace();
-//        }
-//        maxProgress = MP.getDuration();
-//        currentProgress = MP.getCurrentPosition();
     }
 
     @Override
@@ -91,11 +84,10 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 
     private void createNotificationChannel(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            String description = "Channel Desc";
-
-            NotificationChannel channel = new NotificationChannel("Notification Channel",
-                    "Notification", importance);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            String description = "Channel Description";
+            NotificationChannel channel = new NotificationChannel("default",
+                    "Musica Notification", importance);
             channel.setDescription(description); // Set the channel description
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -104,45 +96,40 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     }
     public void DisplayNotification()
     {
-//        RemoteViews notibuttons = new RemoteViews(getPackageName(), R.layout.notifications); // Replace with your actual layout resource ID
-//
-//        Intent rewindButtonIntent = new Intent(this, NotificationReceiver.class);
+
+        String textContent = "Now playing: " + SongNames.get(CurrentSong);
+
+        // Create Intents for button actions in MainActivity
+//        Intent rewindButtonIntent = new Intent(this, MainActivity.class);
 //        rewindButtonIntent.setAction("Rewind");
-//        PendingIntent rewindPendingIntent = PendingIntent.getBroadcast(this, 0, rewindButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        PendingIntent rewindPendingIntent = PendingIntent.getActivity(this, 0, rewindButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 //
-//        Intent forwardButtonIntent = new Intent(this, NotificationReceiver.class);
+//        Intent forwardButtonIntent = new Intent(this, MainActivity.class);
 //        forwardButtonIntent.setAction("Forward");
-//        PendingIntent forwardPendingIntent = PendingIntent.getBroadcast(this, 1, forwardButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        PendingIntent forwardPendingIntent = PendingIntent.getActivity(this, 1, forwardButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 //
-//        Intent ppButtonIntent = new Intent(this, NotificationReceiver.class);
-//        ppButtonIntent.setAction("Play/Pause");
-//        PendingIntent ppPendingIntent = PendingIntent.getBroadcast(this, 2, ppButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//
-//        notibuttons.setOnClickPendingIntent(R.id.rewindbutton, rewindPendingIntent);
-//        notibuttons.setOnClickPendingIntent(R.id.forwardbutton, forwardPendingIntent);
-//        notibuttons.setOnClickPendingIntent(R.id.playbutton, ppPendingIntent);
-//        notibuttons.setProgressBar(R.id.progressBar, maxProgress, currentProgress, false);
+//        Intent playPauseButtonIntent = new Intent(this, MainActivity.class);
+//        playPauseButtonIntent.setAction("Play/Pause");
+//        PendingIntent playPausePendingIntent = PendingIntent.getActivity(this, 2, playPauseButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-
-        String textContent = "Musica is active!";
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
-                .setContentTitle("Musica Player")
+                .setSmallIcon(R.drawable.ic_notitone)
                 .setContentText(textContent)
-                .setSmallIcon(R.mipmap.musica)
 //                .setContent(notibuttons) // Set the custom RemoteViews here
-                .addAction(R.id.rewindbutton,"Rewind",null)
-                .addAction(R.id.forwardbutton,"Forward",null)
-                .addAction(R.id.playbutton,"PP",null)
+//                .addAction(R.id.rewindbutton,"Rewind",null)
+//                .addAction(R.id.forwardbutton,"Forward",null)
+//                .addAction(R.id.playbutton,"PP",null)
                 .setAutoCancel(true)
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+
+
 
         if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED)
         {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(NOTIFICATION_ID, builder.build());
+                    notificationManager.notify(NOTIFICATION_ID, builder.build());
         }
     }
     public void onDestroy()
@@ -154,22 +141,23 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
-    public void PreviousSong()
-    {
-        if(MP.isPlaying()) {
+    public void PreviousSong() {
+        if (MP.isPlaying()) {
             MP.stop();
             MP.release();
         }
-                if(--CurrentSong == -1) //moving to previous song
-                    CurrentSong = filename.size() - 1;
-                try {
-                    MP = new MediaPlayer();
-                    MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
-                    MP.prepare();
-                    MP.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        if (--CurrentSong == -1) //moving to previous song
+            CurrentSong = filename.size() - 1;
+        try {
+            MP = new MediaPlayer();
+            MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
+            MP.prepare();
+            MP.start();
+            MainActivity.UpdateDuration();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        DisplayNotification(); //trying to change song in notification
         PlaySong();
     }
     public void NextSong() {
@@ -185,9 +173,11 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
                 MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
                 MP.prepare();
                 MP.start();
+                MainActivity.UpdateDuration();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            DisplayNotification(); //trying to change song in notification
             PlaySong();
         }
 
@@ -200,7 +190,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         MP.start();
         if(TimeToPlay > 0)
             MP.seekTo(MP.getDuration() - TimeToPlay);
-        UpdateTitle();
+        MainActivity.UpdateDuration();
         Act = true;
     }
 
@@ -209,6 +199,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         if(!Act)
             return;
         MP.pause();
+        MainActivity.UpdateDuration();
         Act = false;
     }
 
@@ -223,11 +214,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         songID = new int[filename.size()];
         for (int i = 0; i < filename.size(); i++)
             songID[i] = i;
-    }
-    public void UpdateTitle() {
-        if (RegUpdates != null) {
-            RegUpdates.UpdateTitle(SongTitle());
-        }
     }
 
     @Override

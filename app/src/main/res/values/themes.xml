@@ -9,18 +9,7 @@
         <item name="colorAccent">#FF4081</item>
     </style>
 
-    <style name="AppTheme.Dark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize dark mode attributes here -->
-        <item name="colorPrimary">#2196F3</item>
-        <item name="colorPrimaryDark">#1976D2</item>
-        <item name="colorAccent">#FF4081</item>
-    </style>
-
-    <style name="AppTheme.Special" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize light theme attributes here -->
-        <item name="colorPrimary">#2196F3</item>
-        <item name="colorPrimaryDark">#1976D2</item>
-        <item name="colorAccent">#FF4081</item>
-    </style>
+    <style name="MainActivityBackground"><item name="android:background">@color/white</item></style>
+    <style name="TextColor"><item name="android:textColor">@color/black</item></style>
 
 </resources>

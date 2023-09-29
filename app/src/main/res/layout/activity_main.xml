@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:srcCompat="@android:drawable/ic_menu_search"
-        android:src = "@android:drawable/ic_menu_search"
+        android:src="@android:drawable/ic_menu_search"
         android:layout_gravity="top|right"
         android:contentDescription="Search.."/>
 
@@ -25,24 +25,19 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-
     </ListView>
-
-    <TextView
-        android:id="@+id/songNameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:layout_gravity="center_horizontal"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:contentDescription="Displaying songs"/>
 
     <TextView
         android:id="@+id/progressTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Duration"></TextView>
+        android:layout_gravity="center"
+        android:contentDescription="Song Title"
+        android:singleLine="true"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/white">
+    </TextView>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -82,15 +77,13 @@
             tools:srcCompat="@drawable/ic_shuffle"
             android:src="@drawable/ic_shuffle"/>
 
-        <ImageButton
-            android:id="@+id/themeButton"
+        <Switch
+            android:id="@+id/switchtheme"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:srcCompat="@android:drawable/ic_menu_slideshow"
-            android:src="@android:drawable/ic_menu_slideshow"
-            android:onClick="changeThemeOnClick"
-            android:contentDescription="Dark/White"
-            android:padding="10dp"/>  <!--for better touch-->
+            android:layout_weight="1"
+            android:text="Mode" />
+
 
     </LinearLayout>
 
@@ -103,6 +96,25 @@
         android:progress="0"
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
+        android:layout_marginEnd="16dp" />
+
+    <TextView
+        android:id="@+id/DurationSong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/CurrentSec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="20dp" />
 
 </LinearLayout>

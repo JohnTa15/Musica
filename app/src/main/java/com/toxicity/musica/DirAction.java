@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class DirAction extends AppCompatActivity implements View.OnClickListener {
-    private final int PERMISSION_REQUEST_CODE = 1;
     private ListView SongListView;
 
     @Override
@@ -25,41 +24,6 @@ public class DirAction extends AppCompatActivity implements View.OnClickListener
         super.onCreate(SavedInstanceState);
         setContentView(R.layout.activity_main);
         SongListView = findViewById(R.id.SongListView);
-        permission_checker();
-        askPerm();
-    }
-
-    private void askPerm() {
-        boolean perms = false;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { // if android 12 and lower
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0); //This calls onRequestPermissionsResult()
-                perms = true;
-            }
-        } else if (!perms && Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU){ // if android 13+
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO}, 0); //This calls onRequestPermissionsResult()
-            }
-        } else if (perms)
-            Toast.makeText(DirAction.this, "Already granted..", Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(DirAction.this, "Permissions are denied..", Toast.LENGTH_SHORT).show();
-    }
-
-    private void permission_checker() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-            } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.READ_MEDIA_AUDIO}, PERMISSION_REQUEST_CODE);
-                }
-            }
-        }
     }
 
     @Override

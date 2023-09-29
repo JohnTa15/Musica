@@ -19,7 +19,8 @@
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Design.NoActionBar" />
         <service android:name=".MusicaService" />
         <activity
             android:name=".SplashScreen"

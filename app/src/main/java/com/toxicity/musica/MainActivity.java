@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import com.toxicity.musica.DirAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,25 +55,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int progress;
     private ListView SongListView;
     private List<File> songList; //the list of songs that is displayed by choosing a file with searchbutton
-    private ArrayList<String> SongNames; //displaying names
+    public static ArrayList<String> SongNames; //displaying names
     private TextView songNameTextView;
+    private static TextView DurationSong;
     private SeekBar seekBar; //current min and sec of playing song
     private TextView progressTextView;
     boolean Connected;
     ImageButton searchbutton;
     Timer timer = null;
     TimerTask timertask;
+    TimerTask currentsec;
     ImageButton playbutton;
     ArrayList<File> audiofiles = null;
     ImageButton forwardbutton;
     ImageButton rewindbutton;
-    ImageButton themeButton;
+    Switch switchtheme;
     MusicaService musicaService;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
+        askingPerms();
+
         songList = new ArrayList<>();
         SongNames = new ArrayList<>();
         SongListView = findViewById(R.id.SongListView);
@@ -83,21 +89,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         arrayAdapter.notifyDataSetChanged();
         SongListView.setAdapter(arrayAdapter);
 
-        songNameTextView = findViewById(R.id.songNameTextView);
+//        songNameTextView = findViewById(R.id.songNameTextView);
         seekBar = findViewById(R.id.seekBar);
         progressTextView = findViewById(R.id.progressTextView);
+        DurationSong = findViewById(R.id.DurationSong);
 
         searchbutton = findViewById(R.id.searchbutton);
         playbutton = findViewById(R.id.playbutton);
         forwardbutton = findViewById(R.id.forwardbutton);
         rewindbutton = findViewById(R.id.rewindbutton);
-        themeButton = findViewById(R.id.themeButton);
+        switchtheme = findViewById(R.id.switchtheme);
 
         playbutton.setOnClickListener(this);
         forwardbutton.setOnClickListener(this);
         rewindbutton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
-        themeButton.setOnClickListener(this);
+        switchtheme.setOnClickListener(this);
         Connected = false;
 
         if(SongNames.isEmpty()) {
@@ -105,26 +112,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             playbutton.setEnabled(false);
             rewindbutton.setEnabled(false);
             forwardbutton.setEnabled(false);
-            themeButton.setEnabled(false);
+            switchtheme.setEnabled(false);
             seekBar.setVisibility(View.GONE);
         }
         else
             DoStart();
 
-
+//        switchtheme.setOnClickListener();
         SongListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 MusicaService.CurrentSong = i;
                 progressTextView.setText(SongNames.get(i));
+                UpdateDuration();
             }
         });
-
-        //registering broadcast receiver to listen for the finish of the song
-        IntentFilter filter = new IntentFilter("com.example.SONG_COMPLETED");
-        registerReceiver(completionReceiver, filter);
     }
 
+    private void askingPerms() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO}, 1);
+            }
+        }
+    }
     private void setupSeekBar(){
         seekBar.setMax(MusicaService.MP.getDuration()); //max progress
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -140,11 +155,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    // Method to update the TextView with the current progress value in minutes and seconds
-    private void UpdateProgressText(int progress) {
-        int mins = progress / 60;
-        int sec = progress % 60;
-        progressTextView.setText(String.format("%02d:%02d", mins, sec)); //displaying mins and sec to display the progress of a song
+    //Total Duration of a song
+    public static void UpdateDuration() {
+        int converting = MusicaService.MP.getDuration() / 1000;
+        int mins = converting / 60;
+        int sec = converting % 60;
+        String durationText = String.format("%02d:%02d", mins, sec); //displaying mins and sec to display the progress of a song
+        DurationSong.setText(durationText);
+//        String currentsectext = String.format("%02d:%02d", mins, sec);
+    }
+
+    private void UpdateProgress(int progress) {
         timertask = new TimerTask() {
             @Override
             public void run() {
@@ -255,25 +276,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playbutton.setImageResource(R.drawable.ic_play);
     }
 
-    public void changeThemeOnClick(View view)
-    {
-        String[] themes = {"Dark", "Light", "Special"};
-        int currentThemeIndex = Arrays.asList(themes).indexOf(getCurrentThemeName());
+//    public void changeThemeOnClick(View view)
+//    {
+//        String[] themes = {"Dark", "Light", "Special"};
+//        int currentThemeIndex = Arrays.asList(themes).indexOf(getCurrentThemeName());
+//
+//        String nextTheme = themes[(currentThemeIndex + 1) % themes.length];
+//
+//        ThemeManager.changeTheme(this, nextTheme);
+//    }
 
-        String nextTheme = themes[(currentThemeIndex + 1) % themes.length];
-
-        ThemeManager.changeTheme(this, nextTheme);
-    }
-
-    private String getCurrentThemeName(){
-        int themeResId = getApplicationInfo().theme;
-        if(themeResId == R.style.AppTheme_Dark)
-            return "Dark";
-        else if(themeResId == R.style.AppTheme_Light)
-            return "Light";
-        else
-            return "Special";
-    }
+//    private String getCurrentThemeName(){
+//        int themeResId = getApplicationInfo().theme;
+//        if(themeResId == R.style.AppTheme_Dark)
+//            return "Dark";
+//        else if(themeResId == R.style.AppTheme_Light)
+//            return "Light";
+//        else
+//            return "Special";
+//    }
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
@@ -290,17 +311,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             musicaService = binder.getService();
             Connected = true;
             setupSeekBar();
-            UpdateProgressText(progress);
+            UpdateProgress(progress);
         }
         @Override
         public void onServiceDisconnected(ComponentName CompNam) { Connected = false;}
     };
 
-    private final BroadcastReceiver completionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String songName = intent.getStringExtra("songName");
-            updateSongName(songName);
-        }
-    };
 }
