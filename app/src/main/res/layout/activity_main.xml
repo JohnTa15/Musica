@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/darkpurple"
     tools:context=".MainActivity">
 
 
@@ -17,7 +16,8 @@
         tools:srcCompat="@android:drawable/ic_menu_search"
         android:src="@android:drawable/ic_menu_search"
         android:layout_gravity="top|right"
-        android:contentDescription="Search.."/>
+        android:contentDescription="Search.."
+        style="?android:borderlessButtonStyle"/>
 
     <!-- ListView to display audio files -->
     <!-- Horizontal LinearLayout for buttons -->
@@ -44,46 +44,53 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        >
 
         <ImageButton
             android:id="@+id/rewindbutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:srcCompat="@drawable/ic_rewind"
-            android:src="@drawable/ic_rewind"
-            android:contentDescription="It is Rewind Time"/>
+            tools:srcCompat="@drawable/ic_rewindinv"
+            android:src="@drawable/ic_rewindinv"
+            android:contentDescription="It is Rewind Time"
+            style="?android:borderlessButtonStyle"/>
 
         <ImageButton
             android:id="@+id/playbutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:srcCompat="@drawable/ic_play"
-            android:src="@drawable/ic_play"
-            android:contentDescription="It is Play Time" />
+            tools:srcCompat="@drawable/ic_playinv"
+            android:src="@drawable/ic_playinv"
+            android:contentDescription="It is Play Time"
+            style="?android:borderlessButtonStyle"/>
 
         <ImageButton
             android:id="@+id/forwardbutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="It is Forward Time"
-            tools:srcCompat="@drawable/ic_forward"
-            android:src="@drawable/ic_forward"/>
+            tools:srcCompat="@drawable/ic_forwardinv"
+            android:src="@drawable/ic_forwardinv"
+            style="?android:borderlessButtonStyle"/>
 
         <ImageButton
             android:id="@+id/shufflebutton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="ShuffleTime"
-            tools:srcCompat="@drawable/ic_shuffle"
-            android:src="@drawable/ic_shuffle"/>
+            tools:srcCompat="@drawable/ic_shuffleinv"
+            android:src="@drawable/ic_shuffleinv"
+            style="?android:borderlessButtonStyle"/>
 
-        <Switch
-            android:id="@+id/switchtheme"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Mode" />
+<!--        <Switch-->
+<!--            android:id="@+id/switchtheme"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="Mode"-->
+<!--            android:textColor="@color/white"-->
+<!--            style="?android:borderlessButtonStyle"/>-->
 
 
     </LinearLayout>

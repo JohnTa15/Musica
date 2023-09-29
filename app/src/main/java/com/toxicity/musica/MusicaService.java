@@ -113,7 +113,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 //        PendingIntent playPausePendingIntent = PendingIntent.getActivity(this, 2, playPauseButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
-                .setSmallIcon(R.drawable.ic_notitone)
+                .setSmallIcon(R.drawable.ic_notiinv)
                 .setContentText(textContent)
 //                .setContent(notibuttons) // Set the custom RemoteViews here
 //                .addAction(R.id.rewindbutton,"Rewind",null)

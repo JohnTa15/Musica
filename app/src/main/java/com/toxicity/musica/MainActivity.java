@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.view.Window;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -62,13 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SeekBar seekBar; //current min and sec of playing song
     private TextView progressTextView;
     boolean Connected;
-    boolean allPermissionsGranted = false;
+//    boolean isChecked = false;
     ImageButton searchbutton;
     Timer timer = null;
     TimerTask timertask;
-    TimerTask currentsec;
+    private DirAction dirAction = new DirAction();
     ImageButton playbutton;
-    ArrayList<File> audiofiles = null;
     ImageButton forwardbutton;
     ImageButton rewindbutton;
     Switch switchtheme;
@@ -78,18 +79,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
         askingPerms();
+//        recreate();
 
         songList = new ArrayList<>();
         SongNames = new ArrayList<>();
         SongListView = findViewById(R.id.SongListView);
 
         songList = DirAction.MusicFinder.findMusicFiles();
-        for(File i:songList) {
+        for (File i : songList) {
             String filename = i.getName(); //audio file names
             int lastDotIndex = filename.lastIndexOf("."); //in case it has extensions..
 
 //            SongNames.add(i.getName());
-            if(lastDotIndex > 0) {
+            if (lastDotIndex > 0) {
                 String SongNameswithoutExt = filename.substring(0, lastDotIndex);
                 SongNames.add(SongNameswithoutExt); //removing extensions
             } else
@@ -107,13 +109,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playbutton = findViewById(R.id.playbutton);
         forwardbutton = findViewById(R.id.forwardbutton);
         rewindbutton = findViewById(R.id.rewindbutton);
-        switchtheme = findViewById(R.id.switchtheme);
+//        switchtheme = findViewById(R.id.switchtheme);
 
         playbutton.setOnClickListener(this);
         forwardbutton.setOnClickListener(this);
         rewindbutton.setOnClickListener(this);
         seekBar.setOnClickListener(this);
-        switchtheme.setOnClickListener(this);
+
+//        switchtheme.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+//                if (isChecked) {
+//                    setTheme(R.style.Theme_Musica);
+//                } else {
+//                    setTheme(R.style.DarkTheme_Musica);
+//                }
+//                recreate();
+//            }
+//        });
+//
+//        int currentTheme = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+//        switchtheme.setChecked(currentTheme == Configuration.UI_MODE_NIGHT_YES);
+
         Connected = false;
 
         if(SongNames.isEmpty()) {
@@ -141,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void askingPerms() {
+    public void askingPerms() {
         String[] permissions1 = new String[]{
                 android.Manifest.permission.READ_EXTERNAL_STORAGE};
         String[] permissions2 = new String[]{
@@ -150,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { //for a12 and lower
             if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(permissions1, 1);
+                requestPermissions(permissions1, 1);
             }
         }
         else {
@@ -160,22 +177,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (request_code == 1) {
-//            // Check if all permissions are granted
-//            for (int grantResult : grantResults) {
-//                if (grantResult != PackageManager.PERMISSION_GRANTED) {
-//                    allPermissionsGranted = false;
-//                    Toast.makeText(this,"You denied the permissions..",Toast.LENGTH_SHORT).show();
-//                } else
-//
-//                }
-//            }
-//        }
-//    }
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void setupSeekBar(){
         seekBar.setMax(MusicaService.MP.getDuration()); //max progress
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -287,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         musicaService.PlaySong();
-        playbutton.setImageResource(R.drawable.ic_pause);
+        playbutton.setImageResource(R.drawable.ic_pauseinv);
     }
 
     void DoPrevious()
@@ -309,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Connected)
             return;
         musicaService.PauseSong();
-        playbutton.setImageResource(R.drawable.ic_play);
+        playbutton.setImageResource(R.drawable.ic_playinv);
     }
 
 //    public void changeThemeOnClick(View view)

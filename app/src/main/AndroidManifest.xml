@@ -1,4 +1,4 @@
-<?xml version="1.5" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -20,7 +20,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:theme="@style/Theme.Design.NoActionBar" />
+            android:configChanges="uiMode"
+            android:theme="@style/DarkTheme.Musica" />
         <service android:name=".MusicaService" />
         <activity
             android:name=".SplashScreen"
