@@ -1,9 +1,11 @@
 package com.toxicity.musica;
 
 import static com.toxicity.musica.MainActivity.SongNames;
+import static com.toxicity.musica.MainActivity.UpdateDuration;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.app.Service;
@@ -99,26 +101,13 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 
         String textContent = "Now playing: " + SongNames.get(CurrentSong);
 
-        // Create Intents for button actions in MainActivity
-//        Intent rewindButtonIntent = new Intent(this, MainActivity.class);
-//        rewindButtonIntent.setAction("Rewind");
-//        PendingIntent rewindPendingIntent = PendingIntent.getActivity(this, 0, rewindButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//        Intent forwardButtonIntent = new Intent(this, MainActivity.class);
-//        forwardButtonIntent.setAction("Forward");
-//        PendingIntent forwardPendingIntent = PendingIntent.getActivity(this, 1, forwardButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//        Intent playPauseButtonIntent = new Intent(this, MainActivity.class);
-//        playPauseButtonIntent.setAction("Play/Pause");
-//        PendingIntent playPausePendingIntent = PendingIntent.getActivity(this, 2, playPauseButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon(R.drawable.ic_notiinv)
                 .setContentText(textContent)
-//                .setContent(notibuttons) // Set the custom RemoteViews here
-//                .addAction(R.id.rewindbutton,"Rewind",null)
-//                .addAction(R.id.forwardbutton,"Forward",null)
-//                .addAction(R.id.playbutton,"PP",null)
+//                .setContentIntent(playPausePendingIntent)
+//                .addAction(R.id.rewindbutton,null,rewindPendingIntent)
+//                .addAction(R.id.forwardbutton,null,forwardPendingIntent)
+//                .addAction(R.id.playbutton,null,playPausePendingIntent)
                 .setAutoCancel(true)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW);
@@ -203,6 +192,17 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         Act = false;
     }
 
+//    private void SearchingSongs() {
+//        String query = searchEditText.getText().toString().toLowerCase();
+//        MainActivity.SongNames.clear();
+//
+//        for(File song : MainActivity.songListView) {
+//            String songName = song.getName().toLowerCase();
+//            if(songName.contains(query))
+//                Song.add(SongNames);
+//        }
+//    }
+
     public String SongTitle() {
         if (CurrentSong >= 0 && CurrentSong < songTitle.size()) {
             return songTitle.get(CurrentSong);
@@ -216,9 +216,20 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             songID[i] = i;
     }
 
+    //CHECK THIS AGAIN TO FIX THE SEQUENCE OF THE SONG AFTER FINISHING
     @Override
     public void onCompletion(MediaPlayer mp) {
         NextSong();
+        try {
+            MusicaService.MP.release();
+            MusicaService.MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
+            MusicaService.MP.prepare();
+            MusicaService.MP.start();
+            UpdateDuration();
+            MainActivity.setupSeekBar();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public void playselectedSong(File songFile) {

@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static ArrayList<String> SongNames; //displaying names
     private TextView songNameTextView;
     private static TextView DurationSong;
-    private SeekBar seekBar; //current min and sec of playing song
+    private static SeekBar seekBar; //current min and sec of playing song
     private TextView progressTextView;
     boolean Connected;
 //    boolean isChecked = false;
@@ -73,13 +73,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton forwardbutton;
     ImageButton rewindbutton;
     Switch switchtheme;
-    MusicaService musicaService;
+    static MusicaService musicaService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
-        askingPerms();
-//        recreate();
 
         songList = new ArrayList<>();
         SongNames = new ArrayList<>();
@@ -158,25 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    public void askingPerms() {
-        String[] permissions1 = new String[]{
-                android.Manifest.permission.READ_EXTERNAL_STORAGE};
-        String[] permissions2 = new String[]{
-                android.Manifest.permission.POST_NOTIFICATIONS, android.Manifest.permission.READ_MEDIA_AUDIO};
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { //for a12 and lower
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(permissions1, 1);
-            }
-        }
-        else {
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(permissions2, 1);
-            }
-        }
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -189,8 +169,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void setupSeekBar(){
-        seekBar.setMax(MusicaService.MP.getDuration()); //max progress
+    public static void setupSeekBar(){
+        seekBar.setMax(musicaService.maxProgress); //max progress
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
