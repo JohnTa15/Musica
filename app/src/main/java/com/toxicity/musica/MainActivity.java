@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static SeekBar seekBar; //current min and sec of playing song
     private TextView progressTextView;
     boolean Connected;
-//    boolean isChecked = false;
+    private TextView CurrentSec;
     ImageButton searchbutton;
     Timer timer = null;
     TimerTask timertask;
@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         seekBar = findViewById(R.id.seekBar);
         progressTextView = findViewById(R.id.progressTextView);
+        CurrentSec = findViewById(R.id.CurrentSec);
         DurationSong = findViewById(R.id.DurationSong);
 
         searchbutton = findViewById(R.id.searchbutton);
@@ -194,13 +195,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        String currentsectext = String.format("%02d:%02d", mins, sec);
     }
 
-    private void UpdateProgress(int progress) {
+    private void UpdateProgress() {
         timertask = new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        int converting = MusicaService.MP.getCurrentPosition() / 1000;
+                        int mins = converting / 60;
+                        int sec = converting % 60;
+                        String currentDurText = String.format("%02d:%02d", mins, sec); //displaying mins and sec to display the progress of a song
+                        CurrentSec.setText(currentDurText); //display the current pos of the song
                         seekBar.setProgress(MusicaService.MP.getCurrentPosition());
                     }
                 });
@@ -210,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             timer = new Timer();
         timer.schedule(timertask,0,1000);
     }
-
     //updating song in the textviewbar
     private void updateSongName(String songName)
     {
@@ -340,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             musicaService = binder.getService();
             Connected = true;
             setupSeekBar();
-            UpdateProgress(progress);
+            UpdateProgress();
         }
         @Override
         public void onServiceDisconnected(ComponentName CompNam) { Connected = false;}
