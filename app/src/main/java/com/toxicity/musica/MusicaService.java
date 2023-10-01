@@ -1,7 +1,6 @@
 package com.toxicity.musica;
 
 import static com.toxicity.musica.MainActivity.SongNames;
-import static com.toxicity.musica.MainActivity.UpdateDuration;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,7 +12,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -22,15 +20,13 @@ import androidx.core.app.NotificationManagerCompat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Timer;
 
-public class MusicaService extends Service implements MediaPlayer.OnCompletionListener
+public class MusicaService extends Service
 {
     final int TimeToPlay = 0;
     ArrayList<File> filename;
     int[] songID;
-    ArrayList<String> songTitle; //for displaying and updating Song Title
-    public static int CurrentSong = 0;
+    public int CurrentSong = 0;
     Boolean Act;
     static MediaPlayer MP;
     int maxProgress;
@@ -46,7 +42,7 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     {
         CurrentSong = 0;
         Act = false;
-        DirAction.MusicFinder musicFinder = new DirAction.MusicFinder();
+//        DirAction.MusicFinder musicFinder = new DirAction.MusicFinder();
         filename = DirAction.MusicFinder.findMusicFiles();
         if (!filename.isEmpty())
         {
@@ -57,6 +53,12 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             } catch (IOException e){
                 e.printStackTrace();
             }
+            MP.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    NextSong();
+                }
+            });
             maxProgress = MP.getDuration();
             currentProgress = MP.getCurrentPosition();
         }
@@ -98,18 +100,32 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     }
     public void DisplayNotification()
     {
+        // rewind intent
+        Intent rewindIntent = new Intent(this, MusicaService.class);
+        rewindIntent.setAction("Rewind");
+        PendingIntent rewingIntentPend = PendingIntent.getService(this, 0, rewindIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // play/pause intent
+        Intent ppIntent = new Intent(this, MusicaService.class);
+        ppIntent.setAction("PP");
+        PendingIntent ppIntentPend = PendingIntent.getService(this, 0, ppIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // next intent
+        Intent forwardIntent = new Intent(this, MusicaService.class);
+        forwardIntent.setAction("Forward");
+        PendingIntent forwardIntentPend = PendingIntent.getService(this, 0, forwardIntent, PendingIntent.FLAG_IMMUTABLE);
 
         String textContent = "Now playing: " + SongNames.get(CurrentSong);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon(R.drawable.ic_notiinv)
                 .setContentText(textContent)
-//                .setContentIntent(playPausePendingIntent)
-//                .addAction(R.id.rewindbutton,null,rewindPendingIntent)
-//                .addAction(R.id.forwardbutton,null,forwardPendingIntent)
-//                .addAction(R.id.playbutton,null,playPausePendingIntent)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
+                .addAction(R.drawable.ic_rewindinv,"Rewind",rewingIntentPend)
+                .addAction(R.drawable.ic_playinv,"PP",ppIntentPend)
+                .addAction(R.drawable.ic_forwardinv,"Forward",forwardIntentPend)
                 .setAutoCancel(true)
-                .setOngoing(true)
+                .setOngoing(false)
                 .setPriority(NotificationCompat.PRIORITY_LOW);
 
 
@@ -146,8 +162,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DisplayNotification(); //trying to change song in notification
-        PlaySong();
     }
     public void NextSong() {
 
@@ -166,8 +180,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DisplayNotification(); //trying to change song in notification
-            PlaySong();
         }
 
     public void PlaySong()
@@ -203,13 +215,6 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
 //        }
 //    }
 
-    public String SongTitle() {
-        if (CurrentSong >= 0 && CurrentSong < songTitle.size()) {
-            return songTitle.get(CurrentSong);
-        } else {
-            return "";
-        }
-    }
     public void IDs() { //creating ID for each song (ex. songID[1] the first one)
         songID = new int[filename.size()];
         for (int i = 0; i < filename.size(); i++)
@@ -217,20 +222,20 @@ public class MusicaService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     //CHECK THIS AGAIN TO FIX THE SEQUENCE OF THE SONG AFTER FINISHING
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        NextSong();
-        try {
-            MusicaService.MP.release();
-            MusicaService.MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
-            MusicaService.MP.prepare();
-            MusicaService.MP.start();
-            UpdateDuration();
-            MainActivity.setupSeekBar();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    public void onCompletion(MediaPlayer mp) {
+//        NextSong();
+////        try {
+////            MusicaService.MP.release();
+////            MusicaService.MP.setDataSource(String.valueOf(filename.get(CurrentSong)));
+////            MusicaService.MP.prepare();
+////            MusicaService.MP.start();
+////            UpdateDuration();
+////            MainActivity.setupSeekBar();
+////        } catch (IOException e){
+////            e.printStackTrace();
+////        }
+//    }
 
     public void playselectedSong(File songFile) {
         if(MP != null)

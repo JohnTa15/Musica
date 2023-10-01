@@ -1,65 +1,39 @@
 package com.toxicity.musica;
 
-import android.Manifest;
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
-import com.toxicity.musica.DirAction;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SearchView.OnCloseListener {
     int currentSong;
-    int progress;
     private ListView SongListView;
-    private final int request_code = 1;
+//    private final int request_code = 1;
     private List<File> songList; //the list of songs that is displayed by choosing a file with searchbutton
     public static ArrayList<String> SongNames; //displaying names
-    private TextView songNameTextView;
     private static TextView DurationSong;
     private static SeekBar seekBar; //current min and sec of playing song
     private TextView progressTextView;
@@ -68,11 +42,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton searchbutton;
     Timer timer = null;
     TimerTask timertask;
-    private DirAction dirAction = new DirAction();
     ImageButton playbutton;
     ImageButton forwardbutton;
     ImageButton rewindbutton;
-    Switch switchtheme;
+//    Switch switchtheme;
     static MusicaService musicaService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String filename = i.getName(); //audio file names
             int lastDotIndex = filename.lastIndexOf("."); //in case it has extensions..
 
-//            SongNames.add(i.getName());
             if (lastDotIndex > 0) {
                 String SongNameswithoutExt = filename.substring(0, lastDotIndex);
                 SongNames.add(SongNameswithoutExt); //removing extensions
@@ -137,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             playbutton.setEnabled(false);
             rewindbutton.setEnabled(false);
             forwardbutton.setEnabled(false);
-            switchtheme.setEnabled(false);
+//            switchtheme.setEnabled(false);
             seekBar.setVisibility(View.GONE);
         }
         else
@@ -147,12 +119,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SongListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                MusicaService.CurrentSong = i;
+                musicaService.CurrentSong = i;
                 progressTextView.setText(SongNames.get(i));
                 File songFile = songList.get(i);
                 if(musicaService != null)
                     musicaService.playselectedSong(songFile);
                 UpdateDuration();
+                musicaService.MP.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer MP) {
+                        musicaService.NextSong();
+                    }
+                });
+                progressTextView.setText(SongNames.get(musicaService.CurrentSong));
+                seekBar.setMax(musicaService.MP.getDuration());
             }
         });
     }
@@ -216,42 +196,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             timer = new Timer();
         timer.schedule(timertask,0,1000);
     }
-    //updating song in the textviewbar
-    private void updateSongName(String songName)
-    {
-        songNameTextView.setText(songName);
-    }
 
-    private void onCompletion(MediaPlayer mp){
-        String songName = "Next Song";
-        updateSongName(songName);
 
-        Intent intent = new Intent("com.example.SONG_COMPLETED");
-        intent.putExtra("songName", songName);
-        sendBroadcast(intent);
-    }
+//    private void onCompletion(MediaPlayer mp){
+//        String songName = "Next Song";
+//        updateSongName(songName);
+//
+//        Intent intent = new Intent("com.example.SONG_COMPLETED");
+//        intent.putExtra("songName", songName);
+//        sendBroadcast(intent);
+//    }
     @Override
     public void onClick(View view)
     {
         if(view == playbutton && musicaService.Act) //first press for play music and second press for pause music
         {
             DoPause();
+            DoPause();
         } else if(view == playbutton)
         {
-            progressTextView.setText(SongNames.get(MusicaService.CurrentSong));
+            progressTextView.setText(SongNames.get(musicaService.CurrentSong));
             DoPlay();
         }
 
         if(view == forwardbutton)
         {
             DoNext();
-            progressTextView.setText(SongNames.get(MusicaService.CurrentSong));
+            progressTextView.setText(SongNames.get(musicaService.CurrentSong));
         }
 
         if(view == rewindbutton)
         {
             DoPrevious();
-            progressTextView.setText(SongNames.get(MusicaService.CurrentSong));
+            progressTextView.setText(SongNames.get(musicaService.CurrentSong));
         }
     }
 
@@ -293,6 +270,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Connected)
             return;
         musicaService.PreviousSong();
+        musicaService.MP.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                DoNext();
+            }
+        });
+        progressTextView.setText(SongNames.get(musicaService.CurrentSong));
+        musicaService.DisplayNotification();
+        seekBar.setMax(musicaService.MP.getDuration());
     }
 
     void DoNext()
@@ -300,6 +286,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Connected)
             return;
         musicaService.NextSong();
+        musicaService.MP.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                DoNext();
+            }
+        });
+        progressTextView.setText(SongNames.get(musicaService.CurrentSong));
+        musicaService.DisplayNotification();
+        seekBar.setMax(musicaService.MP.getDuration());
     }
 
     void DoPause()
@@ -344,12 +339,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             MusicaService.LocalBinder binder = (MusicaService.LocalBinder) service;
             musicaService = binder.getService();
             Connected = true;
+            musicaService.MP.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    DoNext();
+                }
+            });
+            progressTextView.setText(SongNames.get(musicaService.CurrentSong));
             setupSeekBar();
             UpdateProgress();
         }
         @Override
         public void onServiceDisconnected(ComponentName CompNam) { Connected = false;}
     };
-
-
 }
